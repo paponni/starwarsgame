@@ -30,9 +30,12 @@ public class StarWarsGame extends ApplicationAdapter {
     //timing
     private int backgroundOffset;
 
+    private float timeBetweenEnemySpawn = 3f;
+    private float enemySpawnTimer = 0;
+
     //ships
     private Ship playerShip;
-    private Ship enemyShip;
+    private LinkedList<Ship> enemyShipList;
     private LinkedList<Lazer> playerLazerList ;
     private LinkedList<Lazer> enemyLazerList;
     private LinkedList<Explosion> explosionList ;
@@ -46,7 +49,7 @@ public class StarWarsGame extends ApplicationAdapter {
         backgroundOffset = 0;
         batch = new SpriteBatch();
         playerShip = PlayerShipFactory.create(SCREEN_HEIGHT, SCREEN_WIDTH);
-        enemyShip = EnemyShipFactory.create(SCREEN_HEIGHT, SCREEN_WIDTH);
+        enemyShipList = new LinkedList<>();
         playerLazerList = new LinkedList<>();
         enemyLazerList = new LinkedList<>();
         explosionList = new LinkedList<>();
@@ -59,12 +62,19 @@ public class StarWarsGame extends ApplicationAdapter {
         ScreenUtils.clear(1, 0, 0, 1);
         batch.begin();
         playerShip.update(deltaTime);
-        enemyShip.update(deltaTime);
         batch.draw(background, 0, 0,SCREEN_WIDTH,SCREEN_HEIGHT);
-        playerShip.draw(batch);
-        enemyShip.draw(batch);
+        spawnEnemyShips(deltaTime);
+        ListIterator<Ship> enemyShipListIterator = enemyShipList.listIterator();
+        while (enemyShipListIterator.hasNext()){
+            Ship enemyShip = enemyShipListIterator.next();
+            enemyShip.update(deltaTime);
+            enemyShip.draw(batch);
+            enemyShip.render();
+        }
+
         playerShip.render_x();
-        enemyShip.render();
+
+        playerShip.draw(batch);
 
         //lasers
         renderLasers(deltaTime);
@@ -75,19 +85,34 @@ public class StarWarsGame extends ApplicationAdapter {
         batch.end();
     }
 
+    private void spawnEnemyShips(float deltaTime){
+        enemySpawnTimer +=deltaTime;
+        if(enemySpawnTimer > timeBetweenEnemySpawn){
+            enemyShipList.add(EnemyShipFactory.create(SCREEN_HEIGHT, SCREEN_WIDTH))  ;
+            enemySpawnTimer -= timeBetweenEnemySpawn;
+        }
+
+    }
+
     private void detectCollision(){
         ListIterator<Lazer> iterator= playerLazerList.listIterator();
         while (iterator.hasNext()){
             Lazer lazer = iterator.next();
-            if(enemyShip.intersects(lazer.getBoundingBox())){
-                if(enemyShip.hitAndCheckDestroyed(lazer)){
-                    explosionList.add(new Explosion(explosionTexture
-                            ,new Rectangle(enemyShip.xPosition,enemyShip.yPosition,enemyShip.width,enemyShip.height)
-                            ,0.7f));
+            ListIterator<Ship> enemyShipListIterator = enemyShipList.listIterator();
+            while (enemyShipListIterator.hasNext()){
+                Ship enemyShip= enemyShipListIterator.next();
+                if(enemyShip.intersects(lazer.getBoundingBox())){
+                    if(enemyShip.hitAndCheckDestroyed(lazer)){
+                        explosionList.add(new Explosion(explosionTexture
+                                ,new Rectangle(enemyShip.xPosition,enemyShip.yPosition,enemyShip.width,enemyShip.height)
+                                ,0.7f));
+                        enemyShipList.remove();
 
-                };
-                iterator.remove();
+                    };
+                    iterator.remove();
+                }
             }
+
         }
         iterator = enemyLazerList.listIterator();
         while (iterator.hasNext()){
@@ -101,6 +126,7 @@ public class StarWarsGame extends ApplicationAdapter {
 
                 };
                 iterator.remove();
+                break;
             }
         }
     }
@@ -128,12 +154,17 @@ public class StarWarsGame extends ApplicationAdapter {
             }
         }
         //enemy lasers
-        if(enemyShip.canFireLaser()){
-            Lazer[] lazers = enemyShip.fireLasers();
-            for(Lazer lazer : lazers){
-                enemyLazerList.add(lazer);
+        ListIterator<Ship> enemyShipListIterator = enemyShipList.listIterator();
+        while (enemyShipListIterator.hasNext()){
+            Ship enemyShip = enemyShipListIterator.next();
+            if(enemyShip.canFireLaser()){
+                Lazer[] lazers = enemyShip.fireLasers();
+                for(Lazer lazer : lazers){
+                    enemyLazerList.add(lazer);
+                }
             }
         }
+
         //draw lasers
         //remove all lasers
         ListIterator<Lazer> iterator = playerLazerList.listIterator();
