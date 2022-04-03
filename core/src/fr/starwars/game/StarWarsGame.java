@@ -103,13 +103,14 @@ public class StarWarsGame extends ApplicationAdapter {
                 Ship enemyShip= enemyShipListIterator.next();
                 if(enemyShip.intersects(lazer.getBoundingBox())){
                     if(enemyShip.hitAndCheckDestroyed(lazer)){
+                        enemyShipListIterator.remove();
                         explosionList.add(new Explosion(explosionTexture
                                 ,new Rectangle(enemyShip.xPosition,enemyShip.yPosition,enemyShip.width,enemyShip.height)
                                 ,0.7f));
-                        enemyShipList.remove();
 
                     };
                     iterator.remove();
+                    break;
                 }
             }
 
