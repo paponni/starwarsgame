@@ -70,16 +70,15 @@ abstract class Ship {
         if (xPosition < 0 || xPosition > SCREEN_WIDTH) {
             xSpeed = -xSpeed;
         }
-
-
     }
 
 
     public void render_x(){
         xPosition   = Gdx.input.getX();
-//        if(xPosition < 0 || xPosition > SCREEN_WIDTH){
-//            xPosition = -xPosition;
-//        }
+        if(xPosition < 0 || xPosition > SCREEN_WIDTH){
+            xPosition = -xPosition;
+        }
+
     }
     public boolean hitAndCheckDestroyed(Lazer lazer){
         if(shield > 0){
