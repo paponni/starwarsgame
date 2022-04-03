@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 
 abstract class Ship {
     //ship characteristics
@@ -14,7 +15,7 @@ abstract class Ship {
     float width, height;
     //graphics
     TextureRegion texture,laserTexture;
-    double xSpeed = 1.5;
+    double xSpeed = 0.4;
     private final int SCREEN_HEIGHT = 72;
     private final int SCREEN_WIDTH = 128;
 
@@ -58,6 +59,11 @@ abstract class Ship {
     }
     public abstract Lazer[] fireLasers();
 
+    public boolean intersects(Rectangle otherRectangle){
+        Rectangle thisRectangle = new Rectangle(xPosition,yPosition,width,height);
+        return thisRectangle.overlaps(otherRectangle);
+    }
+
 
     public void render() {
         xPosition += xSpeed;
@@ -68,11 +74,21 @@ abstract class Ship {
 
     }
 
+
     public void render_x(){
         xPosition   = Gdx.input.getX();
 //        if(xPosition < 0 || xPosition > SCREEN_WIDTH){
 //            xPosition = -xPosition;
 //        }
     }
+    public boolean hitAndCheckDestroyed(Lazer lazer){
+        if(shield > 0){
+            shield --;
+            return false;
+        }
+        return true;
+    }
+
+
 }
 

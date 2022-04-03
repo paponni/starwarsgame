@@ -6,9 +6,11 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import org.w3c.dom.Text;
 
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -24,14 +26,16 @@ public class StarWarsGame extends ApplicationAdapter {
     //graphics
     private SpriteBatch batch;
     private Texture background;
+    private Texture explosionTexture ;
     //timing
     private int backgroundOffset;
 
     //ships
     private Ship playerShip;
-    private Ship enemyShip,enemyShip2;
+    private Ship enemyShip;
     private LinkedList<Lazer> playerLazerList ;
     private LinkedList<Lazer> enemyLazerList;
+    private LinkedList<Explosion> explosionList ;
 
     @Override
     public void create() {
@@ -45,6 +49,8 @@ public class StarWarsGame extends ApplicationAdapter {
         enemyShip = EnemyShipFactory.create(SCREEN_HEIGHT, SCREEN_WIDTH);
         playerLazerList = new LinkedList<>();
         enemyLazerList = new LinkedList<>();
+        explosionList = new LinkedList<>();
+        explosionTexture = new Texture("sprites/kisspng-sprite-explosion_pack/explosion.png");
     }
 
     @Override
@@ -59,11 +65,44 @@ public class StarWarsGame extends ApplicationAdapter {
         enemyShip.draw(batch);
         playerShip.render_x();
         enemyShip.render();
+
         //lasers
         renderLasers(deltaTime);
+        //detect collisions
+        detectCollision();
         //explosions
         renderExplosions(deltaTime);
         batch.end();
+    }
+
+    private void detectCollision(){
+        ListIterator<Lazer> iterator= playerLazerList.listIterator();
+        while (iterator.hasNext()){
+            Lazer lazer = iterator.next();
+            if(enemyShip.intersects(lazer.getBoundingBox())){
+                if(enemyShip.hitAndCheckDestroyed(lazer)){
+                    explosionList.add(new Explosion(explosionTexture
+                            ,new Rectangle(enemyShip.xPosition,enemyShip.yPosition,enemyShip.width,enemyShip.height)
+                            ,0.7f));
+
+                };
+                iterator.remove();
+            }
+        }
+        iterator = enemyLazerList.listIterator();
+        while (iterator.hasNext()){
+            Lazer lazer = iterator.next();
+            if(playerShip.intersects(lazer.getBoundingBox())){
+                if(playerShip.hitAndCheckDestroyed(lazer)){
+                    explosionList.add(new Explosion(explosionTexture
+                            ,new Rectangle(playerShip.xPosition,playerShip.yPosition,playerShip.width,playerShip.height)
+                            ,1.6f));
+                    playerShip.shield =10;
+
+                };
+                iterator.remove();
+            }
+        }
     }
 
     @Override
@@ -71,6 +110,7 @@ public class StarWarsGame extends ApplicationAdapter {
         batch.dispose();
         background.dispose();
     }
+
 
     @Override
     public void resize(int width, int height) {
@@ -120,6 +160,17 @@ public class StarWarsGame extends ApplicationAdapter {
     }
 
     public void renderExplosions(float deltaTime){
+        ListIterator<Explosion> explosionListIterator = explosionList.listIterator();
+        while (explosionListIterator.hasNext()){
+            Explosion explosion = explosionListIterator.next();
+            explosion.update(deltaTime);
+            if(explosion.isFinished()){
+                explosionListIterator.remove();
+            }
+            else {
+                explosion.draw(batch);
+            }
+        }
 
     }
 }
