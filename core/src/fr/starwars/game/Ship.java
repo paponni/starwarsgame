@@ -1,10 +1,12 @@
 package fr.starwars.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.ScreenUtils;
 
 abstract class Ship {
     //ship characteristics
@@ -67,17 +69,21 @@ abstract class Ship {
 
     public void render() {
         xPosition += xSpeed;
-        if (xPosition < 0 || xPosition > SCREEN_WIDTH) {
+        if (xPosition < 0 || xPosition >= SCREEN_WIDTH - 15) {
             xSpeed = -xSpeed;
         }
     }
 
 
     public void render_x(){
-        xPosition   = Gdx.input.getX();
-        if(xPosition < 0 || xPosition > SCREEN_WIDTH){
-            xPosition = -xPosition;
-        }
+//        ScreenUtils.clear(0, 0, 0.2f, 1);
+
+        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) xPosition -= 200 * Gdx.graphics.getDeltaTime();
+        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) xPosition += 200 * Gdx.graphics.getDeltaTime();
+//        xPosition = -Gdx.input.getX() * Gdx.graphics.getDeltaTime()*200;
+        if(xPosition < 0) xPosition = 0;
+        if(xPosition > SCREEN_WIDTH -15) xPosition = SCREEN_WIDTH - 15;
+
 
     }
     public boolean hitAndCheckDestroyed(Lazer lazer){
