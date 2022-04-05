@@ -77,10 +77,9 @@ abstract class Ship {
 
     public void render_x(){
 //        ScreenUtils.clear(0, 0, 0.2f, 1);
-
-        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) xPosition -= 200 * Gdx.graphics.getDeltaTime();
-        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) xPosition += 200 * Gdx.graphics.getDeltaTime();
-//        xPosition = -Gdx.input.getX() * Gdx.graphics.getDeltaTime()*200;
+            xPosition = Gdx.input.getX();
+//        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) xPosition -= 200 * Gdx.graphics.getDeltaTime();
+//        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) xPosition += 200 * Gdx.graphics.getDeltaTime();
         if(xPosition < 0) xPosition = 0;
         if(xPosition > SCREEN_WIDTH -15) xPosition = SCREEN_WIDTH - 15;
 
